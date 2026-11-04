@@ -1,302 +1,306 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Р­РєРѕРЎР»РµРґ РСЃС‚РѕСЂРёРё вЂ” РџРѕР»РёС‚РµС…</title>
-    <!-- РЎС‚Р°Р±РёР»СЊРЅС‹Р№ СЃРєСЂРёРїС‚ РЇРЅРґРµРєСЃ РљР°СЂС‚ v2.1 -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-    <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f5f5f5; overflow: hidden; }
-        #app { display: flex; flex-direction: column; height: 100vh; position: relative; }
-        #header { background: #0077ff; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
-        #main-container { flex: 1; width: 100%; position: relative; display: none; overflow: hidden; }
-        .screen { width: 100%; height: calc(100vh - 116px); display: none; overflow-y: auto; box-sizing: border-box; }
-        .screen.active { display: block; }
-        #map { width: 100%; height: 100%; }
-        #login-screen { position: absolute; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; justify-content: center; padding: 24px; box-sizing: border-box; }
-        .login-box { max-width: 400px; margin: 0 auto; width: 100%; }
-        .login-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 14px; font-size: 15px; }
-        .btn { background: #0077ff; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; }
-        .btn:disabled { background: #cccccc; cursor: not-allowed; }
-        #quest-card { position: absolute; bottom: 20px; left: 16px; right: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 100; display: none; }
-        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #333; }
-        .card-text { font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.4; }
-        #score-board { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
-        #user-info { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: #555; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
-        .badge { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-        .padd-content { padding: 16px; }
-        .list-item { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
-        .list-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 6px; }
-        .list-desc { font-size: 13px; color: #777; line-height: 1.4; }
-        .shop-price { color: #0077ff; font-weight: bold; margin-top: 8px; display: block; }
-        #tab-bar { height: 60px; background: white; border-top: 1px solid #e5e5e5; display: flex; z-index: 10; }
-        .tab-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #888; cursor: pointer; font-weight: 500; }
-        .tab-btn.active { color: #0077ff; }
-        .tab-icon { font-size: 20px; margin-bottom: 2px; }
-        .scanner-view { width: 100%; height: 150px; background: #000; border-radius: 12px; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
-        .scanner-line { position: absolute; width: 100%; height: 2px; background: #ff3366; top: 0; left: 0; animation: scan 2s linear infinite; }
-        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
-        .step-locked { opacity: 0.5; background: #eaeaea; }
-        .step-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
-    </style>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>ЭкоСлед Истории — Политех</title>
+   <!-- Исправленный и стабильный скрипт Яндекс Карт v2.1 -->
+   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+   <style>
+       body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f5f5f5; overflow: hidden; }
+       #app { display: flex; flex-direction: column; height: 100vh; position: relative; }
+       #header { background: #0077ff; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
+       #main-container { flex: 1; width: 100%; position: relative; display: none; overflow: hidden; }
+       .screen { width: 100%; height: calc(100vh - 116px); display: none; overflow-y: auto; box-sizing: border-box; }
+       .screen.active { display: block; }
+       #map { width: 100%; height: 100%; }
+       #login-screen { position: absolute; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; justify-content: center; padding: 24px; box-sizing: border-box; }
+       .login-box { max-width: 400px; margin: 0 auto; width: 100%; }
+       .login-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; }
+       .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 14px; font-size: 15px; }
+       .btn { background: #0077ff; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; }
+       .btn:disabled { background: #cccccc; cursor: not-allowed; }
+       #quest-card { position: absolute; bottom: 20px; left: 16px; right: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 100; display: none; }
+       .card-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #333; }
+       .card-text { font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.4; }
+       #score-board { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
+       #user-info { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: #555; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
+       .badge { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+       .padd-content { padding: 16px; }
+       .list-item { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
+       .list-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 6px; }
+       .list-desc { font-size: 13px; color: #777; line-height: 1.4; }
+       .shop-price { color: #0077ff; font-weight: bold; margin-top: 8px; display: block; }
+       #tab-bar { height: 60px; background: white; border-top: 1px solid #e5e5e5; display: flex; z-index: 10; }
+       .tab-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #888; cursor: pointer; font-weight: 500; }
+       .tab-btn.active { color: #0077ff; }
+       .tab-icon { font-size: 20px; margin-bottom: 2px; }
+       .scanner-view { width: 100%; height: 150px; background: #000; border-radius: 12px; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
+       .scanner-line { position: absolute; width: 100%; height: 2px; background: #ff3366; top: 0; left: 0; animation: scan 2s linear infinite; }
+       @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+       .step-locked { opacity: 0.5; background: #eaeaea; }
+       .step-badge { position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+   </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="header">Р­РєРѕРЎР»РµРґ РСЃС‚РѕСЂРёРё: РџРѕР»РёС‚РµС…</div>
+   <div id="header">ЭкоСлед Истории: Политех</div>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <div class="login-title">Р’С…РѕРґ РІ РґРµРјРѕ-Р°РєРєР°СѓРЅС‚</div>
-            <input type="text" id="username" class="input-field" placeholder="Р›РѕРіРёРЅ (РЅР°РїСЂРёРјРµСЂ, tester1)">
-            <input type="password" id="password" class="input-field" placeholder="РџР°СЂРѕР»СЊ">
-            <button class="btn" onclick="tryLogin()">Р’РѕР№С‚Рё</button>
-        </div>
-    </div>
-    
-    <div id="main-container">
-        <div id="user-info">РРіСЂРѕРє: <span id="user-name-val">...</span></div>
-        <div id="score-board">Р‘Р°Р»Р»С‹: <span id="score-val">0</span> рџЄ™</div>
+   <div id="login-screen">
+       <div class="login-box">
+           <div class="login-title">Вход в демо-аккаунт</div>
+           <input type="text" id="username" class="input-field" placeholder="Логин (например, tester1)">
+           <input type="password" id="password" class="input-field" placeholder="Пароль">
+           <button class="btn" onclick="tryLogin()">Войти</button>
+       </div>
+   </div>
+   
+   <div id="main-container">
+       <div id="user-info">Игрок: <span id="user-name-val">...</span></div>
+       <div id="score-board">Баллы: <span id="score-val">0</span> 🪙</div>
 
-        <!-- РљРђР РўРђ -->
-        <div id="screen-map" class="screen active">
-            <div id="map"></div>
-            <div id="quest-card">
-                <div class="badge">рџ“Ќ Р›РѕРєР°С†РёСЏ СЂР°Р·Р±Р»РѕРєРёСЂРѕРІР°РЅР° С‡РµСЂРµР· QR</div>
-                <div class="card-title" id="q-title">РќР°Р·РІР°РЅРёРµ</div>
-                <div class="card-text" id="q-fact">Fact...</div>
-                <div class="card-text" id="q-task">Task...</div>
-                <input type="text" id="q-input" class="input-field" placeholder="Р’РІРµРґРёС‚Рµ РІР°С€ РѕС‚РІРµС‚...">
-                <button class="btn" id="q-submit-btn" onclick="checkAnswer()">РџСЂРѕРІРµСЂРёС‚СЊ РѕС‚РІРµС‚</button>
-            </div>
-        </div>
+       <!-- КАРТА -->
+       <div id="screen-map" class="screen active">
+           <div id="map"></div>
+           <div id="quest-card">
+               <div class="badge">📍 Локация разблокирована через QR</div>
+               <div class="card-title" id="q-title">Название</div>
+               <div class="card-text" id="q-fact">Fact...</div>
+               <div class="card-text" id="q-task">Task...</div>
+               <input type="text" id="q-input" class="input-field" placeholder="Введите ваш ответ...">
+               <button class="btn" id="q-submit-btn" onclick="checkAnswer()">Проверить ответ</button>
+           </div>
+       </div>
 
-        <!-- РЎРљРђРќР•Р  Р РњРђР РЁР РЈРў -->
-        <div id="screen-quests" class="screen padd-content">
-            <h3>РЎРєР°РЅРµСЂ QR-С‚Р°Р±Р»РёС‡РµРє</h3>
-            <div class="scanner-view">
-                <div class="scanner-line"></div>
-                <span>[ РРјРёС‚Р°С†РёСЏ РІРёРґРѕРёСЃРєР°С‚РµР»СЏ РєР°РјРµСЂС‹ ]</span>
-            </div>
-            
-            <h3>РўРµРєСѓС‰РёР№ Р»РёРЅРµР№РЅС‹Р№ РјР°СЂС€СЂСѓС‚:</h3>
-            <div id="route-list"></div>
-        </div>
+       <!-- СКАНЕР И МАРШРУТ -->
+       <div id="screen-quests" class="screen padd-content">
+           <h3>Сканер QR-табличек</h3>
+           <div class="scanner-view">
+               <div class="scanner-line"></div>
+               <span>[ Имитация видоискателя камеры ]</span>
+           </div>
+           
+           <h3>Текущий линейный маршрут:</h3>
+           <div id="route-list"></div>
+       </div>
 
-        <!-- РњРђР“РђР—РРќ РџР РР—РћР’ -->
-        <div id="screen-shop" class="screen padd-content">
-            <h3>РњР°РіР°Р·РёРЅ РїРѕРѕС‰СЂРµРЅРёР№</h3>
-            <div id="shop-list"></div>
-        </div>
+       <!-- МАГАЗИН ПРИЗОВ -->
+       <div id="screen-shop" class="screen padd-content">
+           <h3>Магазин поощрений</h3>
+           <div id="shop-list"></div>
+       </div>
 
-        <!-- РњРµРЅСЋ РІРєР»Р°РґРѕРє -->
-        <div id="tab-bar">
-            <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
-                <div class="tab-icon">рџ—єпёЏ</div><div>РљР°СЂС‚Р°</div>
-            </button>
-            <button class="tab-btn" id="tab-quests" onclick="switchTab('quests')">
-                <div class="tab-icon">рџ“·</div><div>РЎРєР°РЅРµСЂ QR</div>
-            </button>
-            <button class="tab-btn" id="tab-shop" onclick="switchTab('shop')">
-                <div class="tab-icon">рџЋЃ</div><div>РџСЂРёР·С‹</div>
-            </button>
-        </div>
-    </div>
+       <!-- Меню вкладок -->
+       <div id="tab-bar">
+           <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
+               <div class="tab-icon">🗺️</div><div>Карта</div>
+           </button>
+           <button class="tab-btn" id="tab-quests" onclick="switchTab('quests')">
+               <div class="tab-icon">📷</div><div>Сканер QR</div>
+           </button>
+           <button class="tab-btn" id="tab-shop" onclick="switchTab('shop')">
+               <div class="tab-icon">🎁</div><div>Призы</div>
+           </button>
+       </div>
+   </div>
 </div>
 
 <script>
-    let testUsers = {}, questPoints = [], correctAnswers = {}, prizeList = [];
-    let currentUser = null, currentPoint = null, myMap, geoObjects = [];
+   let testUsers = {}, questPoints = [], correctAnswers = {}, prizeList = [];
+   let currentUser = null, currentPoint = null, myMap, geoObjects = [];
 
-    async function loadProjectData() {
-        try {
-            testUsers = await fetch('accounts.json').then(r => r.json());
-            questPoints = await fetch('quests.json').then(r => r.json());
-            correctAnswers = await fetch('answers.json').then(r => r.json());
-            prizeList = await fetch('prizes.json').then(r => r.json());
-        } catch (e) {
-            alert("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ С„Р°Р№Р»С‹ accounts.json, quests.json, answers.json Рё prizes.json Р·Р°РіСЂСѓР¶РµРЅС‹ РЅР° GitHub СЂСЏРґРѕРј СЃ index.html");
-        }
-    }
+   async function loadProjectData() {
+       try {
+           testUsers = await fetch('accounts.json').then(r => r.json());
+           questPoints = await fetch('quests.json').then(r => r.json());
+           correctAnswers = await fetch('answers.json').then(r => r.json());
+           prizeList = await fetch('prizes.json').then(r => r.json());
+       } catch (e) {
+           alert("Ошибка загрузки данных. Убедитесь, что файлы accounts.json, quests.json, answers.json и prizes.json загружены на GitHub рядом с index.html");
+       }
+   }
 
-    function tryLogin() {
-        const u = document.getElementById('username').value.trim();
-        const p = document.getElementById('password').value.trim();
+   function tryLogin() {
+       const u = document.getElementById('username').value.trim();
+       const p = document.getElementById('password').value.trim();
 
-        if (testUsers[u] && testUsers[u].password === p) {
-            currentUser = testUsers[u];
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-container').style.display = 'block';
-            document.getElementById('user-name-val').innerText = currentUser.name;
-            document.getElementById('score-val').innerText = currentUser.score;
-            
-            renderRouteList();
-            renderShopList();
-            if (typeof ymaps !== 'undefined') {
-                ymaps.ready(initMap);
-            }
-        } else {
-            alert("РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ!");
-        }
-    }
+       if (testUsers[u] && testUsers[u].password === p) {
+           currentUser = testUsers[u];
+           document.getElementById('login-screen').style.display = 'none';
+           document.getElementById('main-container').style.display = 'block';
+           document.getElementById('user-name-val').innerText = currentUser.name;
+           document.getElementById('score-val').innerText = currentUser.score;
+           
+           renderRouteList();
+           renderShopList();
+           if (typeof ymaps !== 'undefined') {
+               ymaps.ready(initMap);
+           }
+       } else {
+           alert("Неверный логин или пароль!");
+       }
+   }
 
-    function initMap() {
-        myMap = new ymaps.Map("map", { center: [30.3722, 60.0075], zoom: 16, controls: ['zoomControl'] });
-        updateMapMarkers();
-    }
+   function initMap() {
+       myMap = new ymaps.Map("map", { center: [59.999863, 30.373461], zoom: 16, controls: ['zoomControl'] });
+       updateMapMarkers();
+   }
 
-    function updateMapMarkers() {
-        if (!myMap) return;
-        geoObjects.forEach(obj => myMap.geoObjects.remove(obj));
-        geoObjects = [];
+   function updateMapMarkers() {
+       if (!myMap) return;
+       geoObjects.forEach(obj => myMap.geoObjects.remove(obj));
+       geoObjects = [];
 
-        let currentActiveId = getNextActiveQuestId();
+       let currentActiveId = getNextActiveQuestId();
 
-        questPoints.forEach(point => {
-            let color = '#cccccc';
-            let hint = "РРґРёС‚Рµ РїРѕ С†РµРїРѕС‡РєРµ РјР°СЂС€СЂСѓС‚Р°";
-            
-            if (currentUser.completed.includes(point.id)) {
-                color = '#00cc66';
-                hint = "РџСЂРѕР№РґРµРЅРѕ!";
-            } else if (point.id === currentActiveId) {
-                color = '#0077ff';
-                hint = "РЎРєР°РЅРёСЂСѓР№С‚Рµ QR РЅР° Р»РѕРєР°С†РёРё!";
-            }
+       questPoints.forEach(point => {
+           let color = '#cccccc';
+           let hint = "Идите по цепочке маршрута";
+           
+           if (currentUser.completed.includes(point.id)) {
+               color = '#00cc66';
+               hint = "Пройдено!";
+           } else if (point.id === currentActiveId) {
+               color = '#0077ff';
+               hint = "Сканируйте QR на локации!";
+           }
 
-            let placemark = new ymaps.Placemark(point.coords, {
-                hintContent: point.title, balloonContent: `<b>${point.title}</b><br>${hint}`
-            }, {
-                preset: 'islands#circleDotIcon', iconColor: color
-            });
+           let placemark = new ymaps.Placemark(point.coords, {
+               hintContent: point.title, balloonContent: `<b>${point.title}</b><br>${hint}`
+           }, {
+               preset: 'islands#circleDotIcon', iconColor: color
+           });
 
-            geoObjects.push(placemark);
-            myMap.geoObjects.add(placemark);
-        });
-    }
+           geoObjects.push(placemark);
+           myMap.geoObjects.add(placemark);
+       });
+   }
 
-    function getNextActiveQuestId() {
-        for (let i = 0; i < questPoints.length; i++) {
-            if (!currentUser.completed.includes(questPoints[i].id)) {
-                return questPoints[i].id;
-            }
-        }
-        return null;
-    }
+   function getNextActiveQuestId() {
+       for (let i = 0; i < questPoints.length; i++) {
+           if (!currentUser.completed.includes(questPoints[i].id)) {
+               return questPoints[i].id;
+           }
+       }
+       return null;
+   }
 
-    function renderRouteList() {
-        const container = document.getElementById('route-list');
-        container.innerHTML = '';
-        let currentActiveId = getNextActiveQuestId();
+   function renderRouteList() {
+       const container = document.getElementById('route-list');
+       container.innerHTML = '';
+       let currentActiveId = getNextActiveQuestId();
 
-        questPoints.forEach(point => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
+       questPoints.forEach(point => {
+           const div = document.createElement('div');
+           div.className = 'list-item';
 
-            let statusText = "рџ”’ Р—Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРѕ";
-            let badgeBg = "#9e9e9e";
+           let statusText = "🔒 Заблокировано";
+           let badgeBg = "#9e9e9e";
 
-            if (currentUser.completed.includes(point.id)) {
-                statusText = "вњ… РџСЂРѕР№РґРµРЅРѕ";
-                badgeBg = "#4caf50";
-            } else if (point.id === currentActiveId) {
-                statusText = "рџЋЇ РђРєС‚РёРІРЅРѕ";
-                badgeBg = "#2196f3";
-            } else {
-                div.classList.add('step-locked');
-            }
+           if (currentUser.completed.includes(point.id)) {
+               statusText = "✅ Пройдено";
+               badgeBg = "#4caf50";
+           } else if (point.id === currentActiveId) {
+               statusText = "🎯 Активно";
+               badgeBg = "#2196f3";
+           } else {
+               div.classList.add('step-locked');
+           }
 
-            div.innerHTML = `<span class="step-badge" style="background:${badgeBg}; color:white">${statusText}</span>
-                             <div class="list-title">${point.title}</div>
-                             <div class="list-desc">РЎРєР°РЅРёСЂСѓР№С‚Рµ РјРµС‚РєСѓ: <code>${point.qrCode}</code> С‡С‚РѕР±С‹ СѓРІРёРґРµС‚СЊ РІРѕРїСЂРѕСЃ.</div>`;
+           div.innerHTML = `
+               <span class="step-badge" style="background:${badgeBg}; color:white">${statusText}</span>
+               <div class="list-title">${point.title}</div>
+               <div class="list-desc">Сканируйте метку: <code>${point.qrCode}</code> чтобы увидеть вопрос.</div>
+           `;
 
-            if (point.id === currentActiveId) {
-                const scanBtn = document.createElement('button');
-                scanBtn.className = 'btn';
-                scanBtn.style.marginTop = '10px';
-                scanBtn.innerText = 'рџ“ё РЎРёРјСѓР»РёСЂРѕРІР°С‚СЊ СЃРєР°РЅРёСЂРѕРІР°РЅРёРµ СЌС‚РѕР№ С‚Р°Р±Р»РёС‡РєРё';
-                scanBtn.onclick = () => handleQRScanned(point.qrCode);
-                div.appendChild(scanBtn);
-            }
+           if (point.id === currentActiveId) {
+               const scanBtn = document.createElement('button');
+               scanBtn.className = 'btn';
+               scanBtn.style.marginTop = '10px';
+               scanBtn.innerText = '📸 Симулировать сканирование этой таблички';
+               scanBtn.onclick = () => handleQRScanned(point.qrCode);
+               div.appendChild(scanBtn);
+           }
 
-            container.appendChild(div);
-        });
-    }
+           container.appendChild(div);
+       });
+   }
 
-    function handleQRScanned(code) {
-        let currentActiveId = getNextActiveQuestId();
-        let point = questPoints.find(p => p.qrCode === code);
+   function handleQRScanned(code) {
+       let currentActiveId = getNextActiveQuestId();
+       let point = questPoints.find(p => p.qrCode === code);
 
-        if (!point || point.id !== currentActiveId) {
-            alert("Р­С‚РѕС‚ QR-РєРѕРґ СЃРµР№С‡Р°СЃ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ Р»РёРЅРµР№РЅС‹Рј РјР°СЂС€СЂСѓС‚РѕРј РёР»Рё РЅРµРІРµСЂРµРЅ!");
-            return;
-        }
+       if (!point || point.id !== currentActiveId) {
+           alert("Этот QR-код сейчас заблокирован линейным маршрутом или неверен!");
+           return;
+       }
 
-        switchTab('map');
-        currentPoint = point;
-        document.getElementById('q-title').innerText = point.title;
-        document.getElementById('q-fact').innerText = point.fact;
-        document.getElementById('q-task').innerHTML = point.task;
-        document.getElementById('q-input').value = '';
-        document.getElementById('q-submit-btn').disabled = false;
-        document.getElementById('quest-card').style.display = 'block';
+       switchTab('map');
+       currentPoint = point;
+       document.getElementById('q-title').innerText = point.title;
+       document.getElementById('q-fact').innerText = point.fact;
+       document.getElementById('q-task').innerHTML = point.task;
+       document.getElementById('q-input').value = '';
+       document.getElementById('q-submit-btn').disabled = false;
+       document.getElementById('quest-card').style.display = 'block';
 
-        if (myMap) myMap.setCenter(point.coords, 17, { transitionDuration: 500 });
-    }
+       if (myMap) myMap.setCenter(point.coords, 17, { transitionDuration: 500 });
+   }
 
-    function checkAnswer() {
-        const userAns = document.getElementById('q-input').value.trim().toLowerCase();
-        if (userAns === correctAnswers[currentPoint.id].toLowerCase()) {
-            currentUser.completed.push(currentPoint.id);
-            currentUser.score += 100;
+   function checkAnswer() {
+       const userAns = document.getElementById('q-input').value.trim().toLowerCase();
+       if (userAns === correctAnswers[currentPoint.id].toLowerCase()) {
+           currentUser.completed.push(currentPoint.id);
+           currentUser.score += 100;
 
-            document.getElementById('score-val').innerText = currentUser.score;
-            document.getElementById('quest-card').style.display = 'none';
+           document.getElementById('score-val').innerText = currentUser.score;
+           document.getElementById('quest-card').style.display = 'none';
 
-            alert("РџСЂР°РІРёР»СЊРЅРѕ! +100 Р±Р°Р»Р»РѕРІ! Р›РѕРєР°С†РёСЏ Р·Р°С„РёРєСЃРёСЂРѕРІР°РЅР°.");
+           alert("Правильно! +100 баллов! Локация зафиксирована.");
 
-            updateMapMarkers();
-            renderRouteList();
-        } else {
-            alert("РќРµРІРµСЂРЅРѕ! РџРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰Рµ СЂР°Р·.");
-        }
-    }
+           updateMapMarkers();
+           renderRouteList();
+       } else {
+           alert("Неверно! Попробуйте еще раз.");
+       }
+   }
 
-    function renderShopList() {
-        const container = document.getElementById('shop-list');
-        container.innerHTML = '';
-        prizeList.forEach(prize => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `<div class="list-title">${prize.title}</div>
-                             <div class="list-desc">${prize.desc}</div>
-                             <span class="shop-price">Р¦РµРЅР°: ${prize.cost} рџЄ™</span>
-                             <button class="btn" style="margin-top:8px; padding:6px;" onclick="buyItem(${prize.cost})">РћР±РјРµРЅСЏС‚СЊ Р±Р°Р»Р»С‹</button>`;
-            container.appendChild(div);
-        });
-    }
+   function renderShopList() {
+       const container = document.getElementById('shop-list');
+       container.innerHTML = '';
+       prizeList.forEach(prize => {
+           const div = document.createElement('div');
+           div.className = 'list-item';
+           div.innerHTML = `
+               <div class="list-title">${prize.title}</div>
+               <div class="list-desc">${prize.desc}</div>
+               <span class="shop-price">Цена: ${prize.cost} 🪙</span>
+               <button class="btn" style="margin-top:8px; padding:6px;" onclick="buyItem(${prize.cost})">Обменять баллы</button>
+           `;
+           container.appendChild(div);
+       });
+   }
 
-    function buyItem(cost) {
-        if (currentUser.score >= cost) {
-            currentUser.score -= cost;
-            document.getElementById('score-val').innerText = currentUser.score;
-            alert("РЈСЃРїРµС€РЅС‹Р№ РѕР±РјРµРЅ Р±РѕРЅСѓСЃР°!");
-        } else {
-            alert("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ Р±Р°Р»Р»РѕРІ!");
-        }
-    }
+   function buyItem(cost) {
+       if (currentUser.score >= cost) {
+           currentUser.score -= cost;
+           document.getElementById('score-val').innerText = currentUser.score;
+           alert("Успешный обмен бонуса!");
+       } else {
+           alert("Недостаточно баллов!");
+       }
+   }
 
-    function switchTab(tabName) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`screen-${tabName}`).classList.add('active');
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        if (tabName === 'map' && myMap) myMap.container.fitToViewport();
-    }
+   function switchTab(tabName) {
+       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+       document.getElementById(`screen-${tabName}`).classList.add('active');
+       document.getElementById(`tab-${tabName}`).classList.add('active');
+       if (tabName === 'map' && myMap) myMap.container.fitToViewport();
+   }
 
-    window.onload = loadProjectData;
+   window.onload = loadProjectData;
 </script>
 </body>
 </html>

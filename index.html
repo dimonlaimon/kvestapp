@@ -4,14 +4,13 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
    <title>ЭкоСлед Истории — Политех</title>
-   <!-- Исправленный и стабильный скрипт Яндекс Карт v2.1 -->
+   <!-- Подключаем Яндекс Карты v2.1 -->
    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
    <style>
        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f5f5f5; overflow: hidden; }
        #app { display: flex; flex-direction: column; height: 100vh; position: relative; }
        #header { background: #0077ff; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
        
-       /* Главный контейнер экранов */
        #main-container { flex: 1; width: 100%; position: relative; display: none; overflow: hidden; }
        .screen { width: 100%; height: calc(100vh - 116px); display: none; overflow-y: auto; box-sizing: border-box; }
        .screen.active { display: block; }
@@ -27,6 +26,7 @@
        .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 14px; font-size: 15px; }
        .btn { background: #0077ff; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; }
        .btn:active { background: #0062cc; }
+       .btn:disabled { background: #cccccc; cursor: not-allowed; }
        
        /* Интерфейс квеста поверх карты */
        #quest-card { position: absolute; bottom: 20px; left: 16px; right: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 100; display: none; }
@@ -35,16 +35,25 @@
        #score-board { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
        #user-info { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.95); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: #555; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 90; }
        .badge { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+       .badge.success { background: #e8f5e9; color: #2e7d32; }
+       .badge.locked { background: #ffebee; color: #c62828; }
 
-       /* Стили контента для вкладок */
+       /* Контент вкладок */
        .padd-content { padding: 16px; }
-       .list-item { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+       .list-item { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
        .list-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 6px; }
        .list-desc { font-size: 13px; color: #777; line-height: 1.4; }
        .shop-price { color: #0077ff; font-weight: bold; margin-top: 8px; display: block; }
 
+       /* Эмулятор сканера QR */
+       .scanner-container { background: #000; border-radius: 12px; padding: 20px; text-align: center; color: white; margin-bottom: 20px; position: relative; overflow: hidden; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+       .scanner-laser { position: absolute; left: 0; right: 0; height: 3px; background: #ff3366; box-shadow: 0 0 8px #ff3366; animation: laserMove 2s infinite ease-in-out; }
+       @keyframes laserMove { 0% { top: 10px; } 50% { top: 170px; } 100% { top: 10px; } }
+       .qr-btn { background: #222; border: 1px solid #444; color: #fff; padding: 8px 12px; margin: 4px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+       .qr-btn:hover { background: #0077ff; border-color: #0077ff; }
+
        /* Нижнее меню (Таб-бар) */
-       #tab-bar { height: 60px; background: white; border-top: 1px solid #e5e5e5; display: flex; z-index: 10; position: absolute; bottom: 0; left: 0; right: 0; }
+       #tab-bar { height: 60px; background: white; border-top: 1px solid #e5e5e5; display: flex; z-index: 10; }
        .tab-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #888; cursor: pointer; font-weight: 500; }
        .tab-btn.active { color: #0077ff; }
        .tab-icon { font-size: 20px; margin-bottom: 2px; }
@@ -75,35 +84,47 @@
            <div id="map"></div>
            <!-- Всплывающая карточка квеста на карте -->
            <div id="quest-card">
-               <div class="badge">📍 Вы на точке! Нашли табличку?</div>
+               <div id="q-badge" class="badge">📍 Вы на точке! Осмотрите табличку</div>
                <div class="card-title" id="q-title">Название</div>
                <div class="card-text" id="q-fact">Факт...</div>
                <div class="card-text" id="q-task">Задание...</div>
                <input type="text" id="q-input" class="input-field" placeholder="Введите ваш ответ...">
-               <button class="btn" onclick="checkAnswer()">Проверить ответ</button>
+               <button id="q-submit-btn" class="btn" onclick="checkAnswer()">Проверить ответ</button>
+               <button class="btn" style="background:#888; margin-top: 8px;" onclick="document.getElementById('quest-card').style.display='none'">Закрыть</button>
            </div>
        </div>
 
-       <!-- ВКЛАДКА 2: СПИСОК КВЕСТОВ / ФАКТОВ -->
+       <!-- ВКЛАДКА 2: СКАНЕР И КВЕСТЫ -->
        <div id="screen-quests" class="screen padd-content">
-           <h3 style="margin-top:0;">Доступные маршруты и локации</h3>
-           <div class="list-item" onclick="switchTab('map')">
-               <div class="list-title">🏛️ Главное здание Политеха</div>
-               <div class="list-desc">Посетите центральный корпус, заложенный в 1902 году. Найдите скрытые неоклассические символы на фасаде здания.</div>
+           <h3>Сканирование таблички (Эмулятор)</h3>
+           <div class="scanner-container">
+               <div class="scanner-laser"></div>
+               <div style="z-index: 5; margin-bottom: 10px; font-weight: bold; font-size: 14px;">Имитация сканирования QR-кода в парке:</div>
+               <div style="z-index: 5;">
+                   <button class="qr-btn" onclick="simulateQR(1)">QR: Главное здание</button>
+                   <button class="qr-btn" onclick="simulateQR(2)">QR: Гидробашня</button>
+                   <button class="qr-btn" onclick="simulateQR(3)">QR: Химический</button>
+               </div>
            </div>
-           <div class="list-item" onclick="switchTab('map')">
-               <div class="list-title">🗼 Историческая Гидробашня</div>
-               <div class="list-desc">Узнайте секреты 46-метрового замка в сердце парка. Выясните, в каком стиле выполнена его знаменитая деревянная надстройка.</div>
+
+           <h3>Линейный маршрут</h3>
+           <div class="list-item" id="list-item-1">
+               <div class="list-title">Шаг 1: 🏛️ Главное здание Политеха</div>
+               <div class="list-desc">Статус: <span id="status-1" style="font-weight:bold; color:#0077ff;">Доступен для сканирования</span></div>
            </div>
-           <div class="list-item" onclick="switchTab('map')">
-               <div class="list-title">🧪 Химический корпус</div>
-               <div class="list-desc">Место, где ковалась великая российская наука. Здесь работали Менделеев и Капица. Посчитайте массивные колонны на входе.</div>
+           <div class="list-item" id="list-item-2">
+               <div class="list-title">Шаг 2: 🗼 Историческая Гидробашня</div>
+               <div class="list-desc">Статус: <span id="status-2" style="font-weight:bold; color:#888;">Заблокирован (пройдите Шаг 1)</span></div>
+           </div>
+           <div class="list-item" id="list-item-3">
+               <div class="list-title">Шаг 3: 🧪 Химический корпус</div>
+               <div class="list-desc">Статус: <span id="status-3" style="font-weight:bold; color:#888;">Заблокирован (пройдите Шаг 2)</span></div>
            </div>
        </div>
 
        <!-- ВКЛАДКА 3: МАГАЗИН ПРИЗОВ -->
        <div id="screen-shop" class="screen padd-content">
-           <h3 style="margin-top:0;">Магазин поощрений</h3>
+           <h3>Магазин поощрений</h3>
            <div class="list-item">
                <div class="list-title">☕ Бесплатный кофе в кофейне-партнере</div>
                <div class="list-desc">Купон на любой классический напиток в кофейнях возле метро «Политехническая».</div>
@@ -116,12 +137,6 @@
                <span class="shop-price">Цена: 400 🪙</span>
                <button class="btn" style="margin-top: 8px; padding: 6px;" onclick="buyItem(400)">Обменять</button>
            </div>
-           <div class="list-item">
-               <div class="list-title">🎒 Фирменный шопер «ЭкоСлед»</div>
-               <div class="list-desc">Стильная тканевая сумка для прогулок из экологичных материалов.</div>
-               <span class="shop-price">Цена: 500 🪙</span>
-               <button class="btn" style="margin-top: 8px; padding: 6px;" onclick="buyItem(500)">Обменять</button>
-           </div>
        </div>
 
        <!-- Нижний Таб-бар -->
@@ -130,7 +145,7 @@
                <div class="tab-icon">🗺️</div><div>Карта</div>
            </button>
            <button class="tab-btn" id="tab-quests" onclick="switchTab('quests')">
-               <div class="tab-icon">📖</div><div>Квесты</div>
+               <div class="tab-icon">📸</div><div>Сканер QR</div>
            </button>
            <button class="tab-btn" id="tab-shop" onclick="switchTab('shop')">
                <div class="tab-icon">🎁</div><div>Призы</div>
@@ -149,14 +164,17 @@
    };
 
    const questPoints = [
-       { id: 1, title: "Главное здание Политеха", coords: [30.372138, 60.007204], fact: "Главное здание заложено в 1902 году архитектором Виррихом в стиле неоклассицизма.", task: "Какое мифическое существо венчает фронтон над главным входом? (Введите: орёл)", answer: "орёл" },
-       { id: 2, title: "Гидробашня Политеха", coords: [30.373977, 60.005847], fact: "Эта 46-метровая башня (1905 г.) снабжала водой городок и была лабораторией.", task: "В каком архитектурном стиле выполнена верхняя деревянная надстройка? (Введите: модерн)", answer: "модерн" },
-       { id: 3, title: "Химический корпус", coords: [30.371190, 60.006456], fact: "Здесь работали Менделеев и Капица. В Первую мировую тут был госпиталь.", task: "Какое количество колонн украшает парадный вход в Химический корпус? (Введите цифру)", answer: "4" }
+       { id: 1, title: "Главное здание Политеха", coords: [30.372132, 60.007137], fact: "Главное здание заложено в 1902 году архитектором Виррихом в стиле неоклассицизма.", task: "Какое мифическое существо венчает фронтон над главным входом? (Введите: орёл)", answer: "орёл" },
+       { id: 2, title: "Гидробашня Политеха", coords: [30.374246, 60.006411], fact: "Эта 46-метровая башня (1905 г.) снабжала водой городок и была лабораторией.", task: "В каком архитектурном стиле выполнена верхняя деревянная надстройка? (Введите: модерн)", answer: "модерн" },
+       { id: 3, title: "Химический корпус", coords: [30.370381, 60.006509], fact: "Здесь работали Менделеев и Капица. В Первую мировую тут был госпиталь.", task: "Какое количество колонн украшает парадный вход в Химический корпус? (Введите цифру)", answer: "4" }
    ];
 
    let currentUser = null;
    let currentPoint = null;
+   let currentRouteIndex = 1; // Текущий необходимый шаг маршрута
+   let completedQuests = {};  // Сюда сохраняются ID решенных квестов текущего сеанса
    let myMap;
+   let mapGeoObjects = {};
 
    function tryLogin() {
        const u = document.getElementById('username').value.trim();
@@ -169,10 +187,13 @@
            document.getElementById('user-name-val').innerText = currentUser.name;
            document.getElementById('score-val').innerText = currentUser.score;
 
+           // Сброс прогресса для нового сеанса демо-теста
+           currentRouteIndex = 1;
+           completedQuests = {};
+           updateRouteUI();
+
            if (typeof ymaps !== 'undefined') {
                ymaps.ready(initMap);
-           } else {
-               alert("Ошибка загрузки карт. Проверьте интернет-соединение.");
            }
        } else {
            alert("Неверный логин или пароль! Используйте: tester1 и 111");
@@ -180,23 +201,134 @@
    }
 
    function initMap() {
-       if (myMap) return;
+       if (myMap) {
+           myMap.destroy();
+       }
        myMap = new ymaps.Map("map", {
-           center: [30.3725, 60.0065], // Политех
+           center: [30.3725, 60.0068],
            zoom: 16,
            controls: ['zoomControl']
        });
 
+       renderMarkers();
+   }
+
+   function renderMarkers() {
+       // Очищаем старые метки, если они были
+       myMap.geoObjects.removeAll();
+
        questPoints.forEach(point => {
+           let color = '#888888'; // Заблокирован по умолчанию
+           let hint = "Заблокировано: Пройдите предыдущие шаги маршрута";
+
+           if (completedQuests[point.id]) {
+               color = '#2e7d32'; // Пройдено (Зеленый)
+               hint = point.title + " (Пройдено)";
+           } else if (point.id === currentRouteIndex) {
+               color = '#0077ff'; // Активный текущий шаг (Синий)
+               hint = point.title + " (Активен. Отсканируйте QR на вкладке сканера)";
+           }
+
            let placemark = new ymaps.Placemark(point.coords, {
-               hintContent: point.title,
-               balloonContent: `<b>${point.title}</b><br><span style='color:#0077ff;cursor:pointer;'>Открыть квест</span>`
+               hintContent: hint,
+               balloonContent: `<b>${point.title}</b><br><small>${hint}</small>`
            }, {
-               preset: 'islands#redCircleDotIcon'
+               preset: 'islands#circleIcon',
+               iconColor: color
            });
 
-           placemark.events.add('click', () => openQuest(point));
            myMap.geoObjects.add(placemark);
+       });
+   }
+
+   // Симуляция сканирования QR-кода с физической таблички в парке
+   function simulateQR(id) {
+       const point = questPoints.find(p => p.id === id);
+       
+       if (completedQuests[id]) {
+           alert("Вы уже выполнили задание на этой локации! Повторное начисление баллов невозможно.");
+           openQuestCard(point, true);
+           switchTab('map');
+           return;
+       }
+
+       if (id !== currentRouteIndex) {
+           alert(`Нарушена линейность маршрута! Сейчас вам нужно найти и отсканировать табличку на Шаге ${currentRouteIndex}.`);
+           return;
+       }
+
+       // Если все условия верны, открываем карточку с вводом ответа
+       openQuestCard(point, false);
+       switchTab('map');
+   }
+
+   function openQuestCard(point, isDone) {
+       currentPoint = point;
+       document.getElementById('q-title').innerText = point.title;
+       document.getElementById('q-fact').innerText = point.fact;
+       document.getElementById('q-task').innerHTML = `<b>Задание:</b> ${point.task}`;
+       document.getElementById('q-input').value = '';
+       
+       const badge = document.getElementById('q-badge');
+       const submitBtn = document.getElementById('q-submit-btn');
+       const inputField = document.getElementById('q-input');
+
+       if (isDone) {
+           badge.className = "badge success";
+           badge.innerText = "🎉 Пройдено! Баллы уже получены";
+           submitBtn.disabled = true;
+           inputField.disabled = true;
+       } else {
+           badge.className = "badge";
+           badge.innerText = "📍 Табличка отсканирована! Решите задачу";
+           submitBtn.disabled = false;
+           inputField.disabled = false;
+       }
+
+       document.getElementById('quest-card').style.display = 'block';
+   }
+
+   function checkAnswer() {
+       if (!currentPoint || completedQuests[currentPoint.id]) return;
+
+       const userAns = document.getElementById('q-input').value.trim().toLowerCase();
+       if (userAns === currentPoint.answer.toLowerCase()) {
+           // Отмечаем как пройденный квест
+           completedQuests[currentPoint.id] = true;
+           currentUser.score += 100;
+           document.getElementById('score-val').innerText = currentUser.score;
+           
+           alert("Правильно! Зачислено +100 баллов! 🪙");
+           document.getElementById('quest-card').style.display = 'none';
+           
+           // Продвигаем линейный маршрут вперед
+           currentRouteIndex++;
+           
+           updateRouteUI();
+           if (myMap) renderMarkers(); // Обновляем цвета меток на карте
+       } else {
+           alert("Неверно! Изучите внимательно текст на табличке (описание факта).");
+       }
+   }
+
+   function updateRouteUI() {
+       questPoints.forEach(point => {
+           const statusText = document.getElementById(`status-${point.id}`);
+           const listItem = document.getElementById(`list-item-${point.id}`);
+           
+           if (completedQuests[point.id]) {
+               statusText.innerText = "✅ Выполнено (+100 🪙)";
+               statusText.style.color = "#2e7d32";
+               listItem.style.opacity = "0.7";
+           } else if (point.id === currentRouteIndex) {
+               statusText.innerText = "🎯 Активен. Отсканируйте QR в парке";
+               statusText.style.color = "#0077ff";
+               listItem.style.opacity = "1";
+           } else {
+               statusText.innerText = "🔒 Заблокировано";
+               statusText.style.color = "#888";
+               listItem.style.opacity = "0.5";
+           }
        });
    }
 
@@ -212,34 +344,13 @@
        }
    }
 
-   function openQuest(point) {
-       currentPoint = point;
-       document.getElementById('q-title').innerText = point.title;
-       document.getElementById('q-fact').innerText = point.fact;
-       document.getElementById('q-task').innerHTML = `<b>Задание:</b> ${point.task}`;
-       document.getElementById('q-input').value = '';
-       document.getElementById('quest-card').style.display = 'block';
-   }
-
-   function checkAnswer() {
-       const userAns = document.getElementById('q-input').value.trim().toLowerCase();
-       if (userAns === currentPoint.answer.toLowerCase()) {
-           currentUser.score += 100;
-           document.getElementById('score-val').innerText = currentUser.score;
-           alert("Правильно! Зачислено +100 баллов! 🪙");
-           document.getElementById('quest-card').style.display = 'none';
-       } else {
-           alert("Неверно! Поищите подсказку в описании или на объекте.");
-       }
-   }
-
    function buyItem(cost) {
        if (currentUser.score >= cost) {
            currentUser.score -= cost;
            document.getElementById('score-val').innerText = currentUser.score;
-           alert("Обмен успешно совершен! Промокод отправлен в ЛС (симуляция).");
+           alert("Обмен успешно совершен! Промокод сохранен в ваш профиль.");
        } else {
-           alert("Недостаточно баллов для обмена! Пройдите квесты на карте.");
+           alert("Недостаточно баллов! Проходите квесты дальше.");
        }
    }
 </script>

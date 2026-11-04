@@ -4,8 +4,15 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
    <title>ЭкоСлед Истории — Политех</title>
-   <!-- Исправленный и стабильный скрипт Яндекс Карт v2.1 -->
+   
+   <!-- Подключаем Яндекс Карты v2.1 -->
    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+   
+   <!-- Подключаем наши базы данных из красивой структуры папок -->
+   <script src="data/quests.js"></script>
+   <script src="data/prizes.js"></script>
+   <script src="data/answers.js"></script>
+
    <style>
        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f5f5f5; overflow: hidden; }
        #app { display: flex; flex-direction: column; height: 100vh; position: relative; }
@@ -19,7 +26,6 @@
        .login-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; }
        .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 14px; font-size: 15px; }
        .btn { background: #0077ff; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; }
-       .btn:disabled { background: #cccccc; cursor: not-allowed; }
        #quest-card { position: absolute; bottom: 20px; left: 16px; right: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 100; display: none; }
        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #333; }
        .card-text { font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.4; }
@@ -47,6 +53,7 @@
 <div id="app">
    <div id="header">ЭкоСлед Истории: Политех</div>
 
+   <!-- ОКНО ВХОДА -->
    <div id="login-screen">
        <div class="login-box">
            <div class="login-title">Вход в демо-аккаунт</div>
@@ -56,11 +63,12 @@
        </div>
    </div>
    
+   <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
    <div id="main-container">
        <div id="user-info">Игрок: <span id="user-name-val">...</span></div>
        <div id="score-board">Баллы: <span id="score-val">0</span> 🪙</div>
 
-       <!-- КАРТА -->
+       <!-- ВКЛАДКА 1: КАРТА -->
        <div id="screen-map" class="screen active">
            <div id="map"></div>
            <div id="quest-card">
@@ -73,7 +81,7 @@
            </div>
        </div>
 
-       <!-- СКАНЕР И МАРШРУТ -->
+       <!-- ВКЛАДКА 2: СКАНЕР И МАРШРУТ -->
        <div id="screen-quests" class="screen padd-content">
            <h3>Сканер QR-табличек</h3>
            <div class="scanner-view">
@@ -85,13 +93,13 @@
            <div id="route-list"></div>
        </div>
 
-       <!-- МАГАЗИН ПРИЗОВ -->
+       <!-- ВКЛАДКА 3: МАГАЗИН ПРИЗОВ -->
        <div id="screen-shop" class="screen padd-content">
            <h3>Магазин поощрений</h3>
            <div id="shop-list"></div>
        </div>
 
-       <!-- Меню вкладок -->
+       <!-- Таб-бар -->
        <div id="tab-bar">
            <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
                <div class="tab-icon">🗺️</div><div>Карта</div>
@@ -107,19 +115,15 @@
 </div>
 
 <script>
-   let testUsers = {}, questPoints = [], correctAnswers = {}, prizeList = [];
-   let currentUser = null, currentPoint = null, myMap, geoObjects = [];
+   let testUsers = {
+       "tester1": { "password": "111", "name": "Алексей (Тест 1)", "score": 0, "completed": [] },
+       "tester2": { "password": "222", "name": "Мария (Тест 2)", "score": 100, "completed": [] },
+       "tester3": { "password": "333", "name": "Иван (Тест 3)", "score": 250, "completed": [] },
+       "tester4": { "password": "444", "name": "Дмитрий (Тест 4)", "score": 0, "completed": [] },
+       "tester5": { "password": "555", "name": "Елена (Тест 5)", "score": 500, "completed": [] }
+   };
 
-   async function loadProjectData() {
-       try {
-           testUsers = await fetch('accounts.json').then(r => r.json());
-           questPoints = await fetch('quests.json').then(r => r.json());
-           correctAnswers = await fetch('answers.json').then(r => r.json());
-           prizeList = await fetch('prizes.json').then(r => r.json());
-       } catch (e) {
-           alert("Ошибка загрузки данных. Убедитесь, что файлы accounts.json, quests.json, answers.json и prizes.json загружены на GitHub рядом с index.html");
-       }
-   }
+   let currentUser = null, currentPoint = null, myMap, geoObjects = [];
 
    function tryLogin() {
        const u = document.getElementById('username').value.trim();
@@ -143,7 +147,7 @@
    }
 
    function initMap() {
-       myMap = new ymaps.Map("map", { center: [59.999863, 30.373461], zoom: 16, controls: ['zoomControl'] });
+       myMap = new ymaps.Map("map", { center: [30.3722, 60.0075], zoom: 16, controls: ['zoomControl'] });
        updateMapMarkers();
    }
 
@@ -167,7 +171,7 @@
            }
 
            let placemark = new ymaps.Placemark(point.coords, {
-               hintContent: point.title, balloonContent: `<b>${point.title}</b><br>${hint}`
+               hintContent: point.title, balloonContent: `<b>\${point.title}</b><br>\${hint}`
            }, {
                preset: 'islands#circleDotIcon', iconColor: color
            });
@@ -209,9 +213,9 @@
            }
 
            div.innerHTML = `
-               <span class="step-badge" style="background:${badgeBg}; color:white">${statusText}</span>
-               <div class="list-title">${point.title}</div>
-               <div class="list-desc">Сканируйте метку: <code>${point.qrCode}</code> чтобы увидеть вопрос.</div>
+               <span class="step-badge" style="background:\${badgeBg}; color:white">\${statusText}</span>
+               <div class="list-title">\${point.title}</div>
+               <div class="list-desc">Сканируйте метку: <code>\${point.qrCode}</code> чтобы увидеть вопрос.</div>
            `;
 
            if (point.id === currentActiveId) {
@@ -273,16 +277,17 @@
            const div = document.createElement('div');
            div.className = 'list-item';
            div.innerHTML = `
-               <div class="list-title">${prize.title}</div>
-               <div class="list-desc">${prize.desc}</div>
-               <span class="shop-price">Цена: ${prize.cost} 🪙</span>
-               <button class="btn" style="margin-top:8px; padding:6px;" onclick="buyItem(${prize.cost})">Обменять баллы</button>
+               <div class="list-title">\${prize.title}</div>
+               <div class="list-desc">\${prize.desc}</div>
+               <span class="shop-price">Цена: \${prize.cost} 🪙</span>
+               <button class="btn" style="margin-top:8px; padding:6px;" onclick="buyItem(\&quot;\${prize.cost}\&quot;)">Обменять баллы</button>
            `;
            container.appendChild(div);
        });
    }
 
    function buyItem(cost) {
+       cost = parseInt(cost);
        if (currentUser.score >= cost) {
            currentUser.score -= cost;
            document.getElementById('score-val').innerText = currentUser.score;
@@ -295,12 +300,10 @@
    function switchTab(tabName) {
        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-       document.getElementById(`screen-${tabName}`).classList.add('active');
-       document.getElementById(`tab-${tabName}`).classList.add('active');
+       document.getElementById(`screen-\${tabName}`).classList.add('active');
+       document.getElementById(`tab-\${tabName}`).classList.add('active');
        if (tabName === 'map' && myMap) myMap.container.fitToViewport();
    }
-
-   window.onload = loadProjectData;
 </script>
 </body>
 </html>

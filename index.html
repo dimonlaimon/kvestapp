@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ЭкоСлед Истории — Политех</title>
+    <!-- Подключаем VK Bridge SDK -->
+    <script src="https://unpkg.com"></script>
+    <!-- Подключаем Яндекс Карты v3 (Вставьте свой API-ключ в query-параметр, если есть) -->
+    <script src="https://yandex.ru"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", sans-serif; background: #f5f5f5; overflow: hidden; }
+        #app { display: flex; flex-direction: column; height: 100vh; }
+        #header { background: #0077ff; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
+        #map-container { flex: 1; width: 100%; position: relative; }
+        #map { width: 100%; height: 100%; }
+        #quest-card { position: absolute; bottom: 16px; left: 16px; right: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 100; display: none; max-height: 40vh; overflow-y: auto; }
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #333; }
+        .card-text { font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.4; }
+        .input-ans { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
+        .btn { background: #0077ff; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .btn:active { background: #0062cc; }
+        #score-board { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 90; }
+        .hint-badge { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="header">ЭкоСлед Истории: Политех Квест</div>
+    
+    <div id="map-container">
+        <div id="score-board">Баллы: <span id="score-val">0</span> 🪙</div>
+        <div id="map"></div>
+        
+        <!-- Карточка текущего квеста -->
+        <div id="quest-card">
+            <div class="hint-badge">📍 Вы пришли к локации! Найдите табличку</div>
+            <div class="card-title" id="q-title">Название точки</div>
+            <div class="card-text" id="q-fact">Исторический факт...</div>
+            <div class="card-text" id="q-task"><b>Задание:</b> Вопрос квеста...</div>
+            <input type="text" id="q-input" class="input-ans" placeholder="Введите ответ...">
+            <button class="btn" onclick="checkAnswer()">Проверить ответ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Инициализация VK Bridge
+    vkBridge.send("VKWebAppInit");
+
+    // Данные квеста по Политеху
+    const questPoints = [
+        {
+            id: 1,
+            title: "Главное здание Политеха",
+            coords: [30.372138, 60.007204], // [Долгота, Широта] для Яндекс v3
+            fact: "Главное здание было заложено в 1902 году. Архитектор Эрнест Виррих спроектировал его в стиле неоклассицизма, напоминающем палаццо итальянского Возрождения.",
+            task: "Посмотрите на фасад. Какое мифическое существо или символ венчает фронтон здания над главным входом? (Введите слово: орёл)",
+            answer: "орёл"
+        },
+        {
+            id: 2,
+            title: "Гидробашня Политеха",
+            coords: [30.374828, 60.006935],
+            fact: "Эта 46-метровая башня — одно из старейших сооружений университета (1905 г). Она снабжала водой весь городок и служила лабораторией для гидравлических исследований.",
+            task: "В каком архитектурном стиле выполненаверхняя деревянная надстройка башни, напоминающая средневековый замок? (Введите: модерн)",
+            answer: "модерн"
+        },
+        {
+            id: 3,
+            title: "Химический корпус",
+            coords: [30.371280, 60.005950],
+            fact: "В лабораториях этого корпуса работали великие ученые, включая Менделеева и Капицу. Во время Первой мировой войны здесь развернули госпиталь.",
+            task: "Какое количество колонн украшает парадный вход в Химический корпус? (Введите цифру)",
+            answer: "4"
+        }
+    ];
+
+    let userScore = 0;
+    let currentPoint = null;
+    let map, ymaps3Instance;
+
+    // Инициализация Яндекс Карт v3
+    async function initMap() {
+        await ymaps3.ready;
+        ymaps3Instance = ymaps3;
+
+        map = new ymaps3.YMap(document.getElementById('map'), {
+            location: {
+                center: [30.372138, 60.007204], // Центр Политеха
+                zoom: 16
+            }
+        });
+
+        // Добавляем слой для отображения карты
+        map.addChild(new ymaps3.YMapDefaultSchemeLayer());
+        map.addChild(new ymaps3.YMapDefaultFeaturesLayer());
+
+        // Наносим точки квеста на карту
+        questPoints.forEach(point => {
+            const markerElement = document.createElement('div');
+            markerElement.style.width = '24px';
+            markerElement.style.height = '24px';
+            markerElement.style.background = '#ff3366';
+            markerElement.style.borderRadius = '50%';
+            markerElement.style.border = '3px solid white';
+            markerElement.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+            markerElement.style.cursor = 'pointer';
+
+            // При клике на маркер открываем задание (для тестов на компьютере)
+            markerElement.addEventListener('click', () => openQuest(point));
+
+            const marker = new ymaps3.YMapMarker({
+                coordinates: point.coords
+            }, markerElement);
+
+            map.addChild(marker);
+        });
+
+        // Запускаем отслеживание геопозиции пользователя через VK Bridge
+        startTracking();
+    }
+
+    // Получение геопозиции игрока
+    function startTracking() {
+        vkBridge.send("VKWebAppGetGeodata")
+            .then(data => {
+                if (data.available) {
+                    const userCoords = [data.long, data.lat];
+                    updateUserLocationMarker(userCoords);
+                    checkProximity(userCoords);
+                }
+            })
+            .catch(error => {
+                console.log("Геолокация недоступна, используйте клики по точкам для теста", error);
+            });
+            
+        // Повторяем проверку каждые 10 секунд
+        setTimeout(startTracking, 10000);
+    }
+
+    let userMarker = null;
+    function updateUserLocationMarker(coords) {
+        if (userMarker) {
+            userMarker.update({ coordinates: coords });
+        } else {
+            const el = document.createElement('div');
+            el.style.width = '16px'; el.style.height = '16px';
+            el.style.background = '#0077ff'; el.style.borderRadius = '50%';
+            el.style.border = '2px solid white';
+            userMarker = new ymaps3.YMapMarker({ coordinates: coords }, el);
+            map.addChild(userMarker);
+        }
+    }
+
+    // Проверка: подошел ли пользователь к какой-либо точке квеста (в радиусе ~40 метров)
+    function checkProximity(userCoords) {
+        questPoints.forEach(point => {
+            const distance = getDistance(userCoords[1], userCoords[0], point.coords[1], point.coords[0]);
+            if (distance < 0.04) { // 0.04 км = 40 метров
+                openQuest(point);
+            }
+        });
+    }
+
+    // Функция расчета расстояния (в км) между координатами
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    // Открытие карточки с заданием
+    function openQuest(point) {
+        currentPoint = point;
+        document.getElementById('q-title').innerText = point.title;
+        document.getElementById('q-fact').innerText = point.fact;
+        document.getElementById('q-task').innerHTML = `<b>Задание:</b> ${point.task}`;
+        document.getElementById('q-input').value = '';
+        document.getElementById('quest-card').style.display = 'block';
+    }
+
+    // Проверка ответа
+    function checkAnswer() {
+        const userAns = document.getElementById('q-input').value.trim().toLowerCase();
+        if (userAns === currentPoint.answer.toLowerCase()) {
+            userScore += 100;
+            document.getElementById('score-val').innerText = userScore;
+            
+            // Виброотклик через VK Bridge при успехе
+            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
+            
+            alert("Правильно! Вы получили 100 баллов! 🪙");
+            document.getElementById('quest-card').style.display = 'none';
+        } else {
+            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "error"});
+            alert("Неверно, попробуйте еще раз или поищите подсказку на локации!");
+        }
+    }
+
+    // Запуск карты при загрузке страницы
+    window.onload = initMap;
+</script>
+</body>
+</html>

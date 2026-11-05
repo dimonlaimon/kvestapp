@@ -1,0 +1,7 @@
+const testUsers = {
+  "tester1": { password: "111", name: "Алексей (Тест 1)", score: 0,   completed: [] },
+  "tester2": { password: "222", name: "Мария (Тест 2)",   score: 100, completed: [1] },
+  "tester3": { password: "333", name: "Иван (Тест 3)",    score: 250, completed: [1,2] },
+  "tester4": { password: "444", name: "Дмитрий (Тест 4)", score: 0,   completed: [] },
+  "tester5": { password: "555", name: "Елена (Тест 5)",   score: 500, completed: [1,2,3] }
+};

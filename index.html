@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ЭкоСлед Истории</title>
+<title>Городские истории</title>
 
 <!-- Яндекс.Карты -->
 <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
@@ -28,13 +28,13 @@
 </head>
 <body>
 <div id="app">
-  <div id="header"><span id="header-title">🌳 ЭкоСлед Истории</span></div>
+  <div id="header"><span id="header-title">🏛️ Городские истории</span></div>
 
   <!-- ЭКРАН ВХОДА / РЕГИСТРАЦИИ -->
   <div id="login-screen" class="overlay">
     <div class="login-box">
-      <div class="login-logo">🌳</div>
-      <div class="login-title" id="auth-title">ЭкоСлед Истории</div>
+      <div class="login-logo">🏛️</div>
+      <div class="login-title" id="auth-title">Городские истории</div>
       <div class="login-sub" id="auth-sub">Введите логин и пароль, чтобы продолжить прогулку</div>
 
       <div id="auth-tabs">
@@ -97,6 +97,10 @@
 
     <!-- ВКЛАДКА 3: МАГАЗИН -->
     <div id="screen-shop" class="screen padd-content">
+      <div id="shop-balance">
+        <span>Ваш баланс</span>
+        <b>⭐ <span id="shop-score-val">0</span> баллов</b>
+      </div>
       <h3>🎁 Магазин поощрений</h3>
       <div id="shop-list"></div>
     </div>

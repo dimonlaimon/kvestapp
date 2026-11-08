@@ -1,6 +1,8 @@
 function showRouteSelect() {
   renderRouteCards();
-  document.getElementById("route-select").classList.remove("hidden");
+  const sel = document.getElementById("route-select");
+  sel.classList.remove("hidden");
+  sel.scrollTop = 0;   // всегда открываем выбор сверху, а не с низа
 }
 
 function renderRouteCards() {
@@ -32,21 +34,25 @@ function chooseRoute(id) {
   currentUser.currentRoute = id;
   if (!currentUser.completedByRoute[id]) currentUser.completedByRoute[id] = [];
   saveProgress();
+
   document.getElementById("route-select").classList.add("hidden");
   startRoute(id);
 }
 
 function startRoute(id) {
   const route = routesData.find(r => r.id === id);
+
   document.getElementById("header-title").innerText = "🌳 ЭкоСлед · " + route.title;
   document.getElementById("main-container").style.display = "flex";
-  document.getElementById("login-screen").classList.add("hidden");
 
   document.getElementById("score-val").innerText = currentUser.score;
   document.getElementById("rb-name").innerText = route.title;
 
   renderRouteList();
   renderShopList();
+
+  // Показываем именно вкладку карты
+  switchTab("map");
 
   if (typeof ymaps !== "undefined") {
     ymaps.ready(() => initMap(route));

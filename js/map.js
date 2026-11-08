@@ -1,6 +1,5 @@
 function initMap(route) {
-  // Если карта уже была (смена маршрута) — сносим и создаём заново,
-  // иначе она остаётся привязана к старому центру и размеру
+  // Если карта уже была (смена маршрута) — сносим и создаём заново
   if (myMap) {
     try { myMap.destroy(); } catch (e) {}
     myMap = null;
@@ -10,18 +9,26 @@ function initMap(route) {
     center: route.center,
     zoom: route.zoom,
     controls: ["zoomControl"]
-  });
-
-  // Не даём отдалиться дальше 12 — на мелких зумах у тайлов нет данных
-  // и появляются серые области
-  myMap.events.add("boundschange", () => {
-    if (myMap.getZoom() < 12) myMap.setZoom(12, { duration: 200 });
+  }, {
+    // Отдаление можно почти до полушарий, но не дальше —
+    // глубже 3 у Яндекс-тайлов уже нет данных
+    minZoom: 3,
+    maxZoom: 19
   });
 
   updateMapMarkers();
 
-  // Пересчёт размера после того, как контейнер точно получил высоту
-  setTimeout(() => { if (myMap) myMap.container.fitToViewport(); }, 300);
+  // Даём карте установить размер и подгоняем масштаб под все точки маршрута
+  setTimeout(() => {
+    if (!myMap) return;
+    myMap.container.fitToViewport();
+    if (geoObjects.length) {
+      myMap.setBounds(myMap.geoObjects.getBounds(), {
+        checkZoomRange: true,
+        zoomMargin: 30
+      });
+    }
+  }, 300);
 }
 
 function updateMapMarkers() {

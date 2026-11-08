@@ -1,6 +1,6 @@
 /* Замок на весь сайт. Пароль запрашивается при каждом открытии. */
 (function () {
-  const SITE_PASSWORD_HASH = "ВАШ_ХЭШ_ОТ_ПАРОЛЯ_САЙТА";
+  const SITE_PASSWORD_HASH = "f8feac9516a732b828c448b22b70702c3fc2c3261b2989997e80035bf51b393d";
 
   function sha256(str) {
     return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))

@@ -7,30 +7,23 @@ function renderRouteCards() {
   const c = document.getElementById("route-cards");
   c.innerHTML = "";
   routesData.forEach(r => {
+    const done = getRouteProgress(r.id).length;
+    const total = r.points.length;
+
     const card = document.createElement("div");
     card.className = "route-card";
+    card.style.background = r.gradient;
+    card.innerHTML =
+      '<div class="route-progress">' + done + " / " + total + "</div>" +
+      '<div class="route-icon">' + r.icon + "</div>" +
+      '<div class="route-name">' + r.title + "</div>" +
+      '<div class="route-area">' + r.desc + "</div>" +
+      '<div class="route-chips">' +
+        '<span class="chip">📍 ' + r.area + "</span>" +
+        '<span class="chip">🚶 ' + r.distance + "</span>" +
+        '<span class="chip">⭐ до ' + total * 100 + " баллов</span>" +
+      "</div>";
     card.onclick = () => chooseRoute(r.id);
-
-    const icon = document.createElement("div");
-    icon.className = "route-icon";
-    icon.innerText = r.icon;
-
-    const info = document.createElement("div");
-    const name = document.createElement("div");
-    name.className = "route-name";
-    name.innerText = r.title;
-    const area = document.createElement("div");
-    area.className = "route-area";
-    area.innerText = r.area;
-    const meta = document.createElement("div");
-    meta.className = "route-meta";
-    meta.innerText = `${r.points.length} точек · до ${r.points.length * 100} баллов`;
-    info.appendChild(name);
-    info.appendChild(area);
-    info.appendChild(meta);
-
-    card.appendChild(icon);
-    card.appendChild(info);
     c.appendChild(card);
   });
 }

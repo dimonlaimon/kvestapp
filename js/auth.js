@@ -5,7 +5,22 @@ function showAuthMode(mode) {
   document.getElementById("lt-login").classList.toggle("active", mode === "login");
   document.getElementById("lt-reg").classList.toggle("active", mode === "reg");
   document.querySelectorAll(".reg-field").forEach(el => el.classList.toggle("hidden", mode === "login"));
-  document.getElementById("auth-btn").innerText = mode === "login" ? "Войти" : "Создать аккаунт";
+
+  const btn = document.getElementById("auth-btn");
+  const sub = document.getElementById("auth-sub");
+  const title = document.getElementById("auth-title");
+
+  if (mode === "login") {
+    btn.innerText = "Войти";
+    btn.classList.remove("btn-reg");
+    title.innerText = "ЭкоСлед Истории";
+    sub.innerText = "Введите логин и пароль, чтобы продолжить прогулку";
+  } else {
+    btn.innerText = "Создать аккаунт";
+    btn.classList.add("btn-reg");
+    title.innerText = "Добро пожаловать!";
+    sub.innerText = "Придумайте логин и пароль — прогресс сохранится на этом устройстве";
+  }
 }
 
 function tryLogin() {
@@ -36,7 +51,6 @@ function registerAccount(u, p) {
   const users = getAllUsers();
   if (users[u]) { showToast("Такой логин уже занят"); return; }
 
-  // Сохраняем только нового пользователя (встроенные тестовые не трогаем)
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(STORE_USERS)) || {}; } catch (e) {}
   saved[u] = { password: p, name: name || u, score: 0, completedByRoute: {}, currentRoute: null };
@@ -50,7 +64,6 @@ function enterApp(login, user) {
   currentUser = user;
   currentLogin = login;
   loadProgress(login);
-
   document.getElementById("user-name-val").innerText = currentUser.name;
 
   if (currentUser.currentRoute) {

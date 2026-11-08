@@ -8,29 +8,28 @@
 <!-- Яндекс.Карты -->
 <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 
-<!-- 1) Стили -->
-<link rel="stylesheet" href="css/style.css">
+<!-- 1) Стили (v — версия для сброса кэша) -->
+<link rel="stylesheet" href="css/style.css?v=6">
 
-<!-- 2) Данные (должны идти раньше логики) -->
-<script src="data/users.js"></script>
-<script src="data/routes.js"></script>
-<script src="data/answers.js"></script>
-<script src="data/prizes.js"></script>
+<!-- 2) Данные -->
+<script src="data/users.js?v=6"></script>
+<script src="data/routes.js?v=6"></script>
+<script src="data/answers.js?v=6"></script>
+<script src="data/prizes.js?v=6"></script>
 
-<!-- 3) Логика (строго после данных) -->
-<script src="js/state.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/routes.js"></script>
-<script src="js/map.js"></script>
-<script src="js/quest.js"></script>
-<script src="js/shop.js"></script>
-<script src="js/main.js"></script>
+<!-- 3) Логика -->
+<script src="js/state.js?v=6"></script>
+<script src="js/auth.js?v=6"></script>
+<script src="js/routes.js?v=6"></script>
+<script src="js/map.js?v=6"></script>
+<script src="js/quest.js?v=6"></script>
+<script src="js/shop.js?v=6"></script>
+<script src="js/main.js?v=6"></script>
 </head>
 <body>
 <div id="app">
   <div id="header"><span id="header-title">🏛️ Городские истории</span></div>
 
-  <!-- ЭКРАН ВХОДА / РЕГИСТРАЦИИ -->
   <div id="login-screen" class="overlay">
     <div class="login-box">
       <div class="login-logo">🏛️</div>
@@ -50,7 +49,6 @@
     </div>
   </div>
 
-  <!-- ЭКРАН ВЫБОРА МАРШРУТА -->
   <div id="route-select" class="overlay hidden">
     <div class="route-picker">
       <div class="login-title">Выберите маршрут</div>
@@ -62,10 +60,8 @@
     </div>
   </div>
 
-  <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
   <div id="main-container">
 
-    <!-- ВКЛАДКА 1: КАРТА -->
     <div id="screen-map" class="screen active">
       <div id="user-info">👤 <span id="user-name-val">…</span></div>
       <div id="score-board">⭐ <span id="score-val">0</span></div>
@@ -80,7 +76,6 @@
       </div>
     </div>
 
-    <!-- ВКЛАДКА 2: СКАНЕР И МАРШРУТ -->
     <div id="screen-quests" class="screen padd-content">
       <div id="route-banner">
         <span>Маршрут: <b id="rb-name"></b></span>
@@ -95,7 +90,6 @@
       <div id="route-list"></div>
     </div>
 
-    <!-- ВКЛАДКА 3: МАГАЗИН -->
     <div id="screen-shop" class="screen padd-content">
       <div id="shop-balance">
         <span>Ваш баланс</span>
@@ -105,7 +99,6 @@
       <div id="shop-list"></div>
     </div>
 
-    <!-- Таб-бар -->
     <div id="tab-bar">
       <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
         <div class="tab-icon">🗺️</div><div>Карта</div>

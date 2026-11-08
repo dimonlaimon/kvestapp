@@ -1,4 +1,7 @@
 function renderShopList() {
+  // Плашка с балансом — теперь баллы видны прямо в магазине
+  document.getElementById("shop-score-val").innerText = currentUser.score;
+
   const container = document.getElementById("shop-list");
   container.innerHTML = "";
   prizeList.forEach(prize => {
@@ -38,5 +41,6 @@ function buyItem(prize) {
   currentUser.score -= prize.cost;
   saveProgress();
   document.getElementById("score-val").innerText = currentUser.score;
-  showToast("Обмен successful! Подробности купона у организаторов.", "success");
+  document.getElementById("shop-score-val").innerText = currentUser.score;
+  showToast("Обмен выполнен! Подробности купона у организаторов.", "success");
 }

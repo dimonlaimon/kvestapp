@@ -15,24 +15,62 @@
     font-weight: 600; cursor: pointer; margin-right: 8px; margin-top: 8px; }
   .reset { background: #e3f2fd; color: #1565c0; }
   .del   { background: #ffebee; color: #c62828; }
+  /* Замок */
+  #lock-screen { position: fixed; inset: 0; z-index: 999; background: #eef2f6;
+    display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .lock-box { max-width: 340px; width: 100%; background: #fff; border-radius: 18px;
+    padding: 28px 24px; box-shadow: 0 12px 40px rgba(0,60,150,.15); text-align: center; }
+  input { width: 100%; padding: 12px 14px; border: 1.5px solid #dfe4ee; border-radius: 12px;
+    margin-bottom: 12px; font-size: 15px; outline: none; box-sizing: border-box; }
+  .btn { background: #0077ff; color: #fff; border: none; padding: 12px; border-radius: 12px;
+    font-weight: 700; cursor: pointer; width: 100%; font-size: 15px; }
+  .lock-error { color: #c62828; font-size: 13px; margin-top: 10px; min-height: 18px; }
 </style>
 </head>
 <body>
-  <!-- Замок админки -->
+
+<!-- Замок админки: пароль при каждом открытии -->
 <div id="lock-screen">
   <div class="lock-box">
     <div style="font-size:40px">🛡️</div>
-    <div class="lock-title">Панель организатора</div>
-    <div class="lock-sub">Введите пароль администратора</div>
-    <input type="password" id="lock-input" placeholder="Пароль">
+    <input type="password" id="lock-input" placeholder="Пароль" style="text-align:center">
     <button class="btn" id="lock-btn">Войти</button>
     <div class="lock-error" id="lock-error"></div>
   </div>
 </div>
 
-<h2>Пользователи</h2>
-<div id="list"></div>
+<div id="admin-content" style="display:none">
+  <h2>Пользователи</h2>
+  <div id="list"></div>
+</div>
+
 <script>
+  const ADMIN_PASSWORD_HASH = "f8feac9516a732b828c448b22b70702c3fc2c3261b2989997e80035bf51b393d";
+
+  function sha256(str) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
+      .then(buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join(""));
+  }
+
+  // --- Замок: спрашивает пароль при каждом открытии ---
+  const input = document.getElementById("lock-input");
+  function tryUnlock() {
+    sha256(input.value).then(h => {
+      if (h === ADMIN_PASSWORD_HASH) {
+        document.getElementById("lock-screen").style.display = "none";
+        document.getElementById("admin-content").style.display = "block";
+        load();
+      } else {
+        document.getElementById("lock-error").innerText = "Неверный пароль";
+        input.value = "";
+      }
+    });
+  }
+  document.getElementById("lock-btn").onclick = tryUnlock;
+  input.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+  input.focus();
+
+  // --- Список пользователей ---
   function load() {
     const box = document.getElementById("list");
     box.innerHTML = "";
@@ -84,46 +122,6 @@
       box.appendChild(card);
     });
   }
-  load();
 </script>
-  <script>
-  const ADMIN_PASSWORD_HASH = "f8feac9516a732b828c448b22b70702c3fc2c3261b2989997e80035bf51b393d";
-
-  function sha256(str) {
-    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
-      .then(buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join(""));
-  }
-
-  function logoutAdmin() {
-    sessionStorage.removeItem("admin_unlocked");
-    location.reload();
-  }
-
-  // --- Замок ---
-  if (sessionStorage.getItem("admin_unlocked") === "1") {
-    document.getElementById("lock-screen").style.display = "none";
-    document.getElementById("admin-content").style.display = "block";
-    load();
-  } else {
-    const input = document.getElementById("lock-input");
-    function tryUnlock() {
-      sha256(input.value).then(h => {
-        if (h === ADMIN_PASSWORD_HASH) {
-          sessionStorage.setItem("admin_unlocked", "1");
-          document.getElementById("lock-screen").style.display = "none";
-          document.getElementById("admin-content").style.display = "block";
-          load();
-        } else {
-          document.getElementById("lock-error").innerText = "Неверный пароль";
-          input.value = "";
-        }
-      });
-    }
-    document.getElementById("lock-btn").onclick = tryUnlock;
-    input.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
-    input.focus();
-  }
-</script>
-
 </body>
 </html>

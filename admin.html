@@ -18,6 +18,18 @@
 </style>
 </head>
 <body>
+  <!-- Замок админки -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div style="font-size:40px">🛡️</div>
+    <div class="lock-title">Панель организатора</div>
+    <div class="lock-sub">Введите пароль администратора</div>
+    <input type="password" id="lock-input" placeholder="Пароль">
+    <button class="btn" id="lock-btn">Войти</button>
+    <div class="lock-error" id="lock-error"></div>
+  </div>
+</div>
+
 <h2>Пользователи</h2>
 <div id="list"></div>
 <script>
@@ -74,5 +86,44 @@
   }
   load();
 </script>
+  <script>
+  const ADMIN_PASSWORD_HASH = "f8feac9516a732b828c448b22b70702c3fc2c3261b2989997e80035bf51b393d";
+
+  function sha256(str) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
+      .then(buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join(""));
+  }
+
+  function logoutAdmin() {
+    sessionStorage.removeItem("admin_unlocked");
+    location.reload();
+  }
+
+  // --- Замок ---
+  if (sessionStorage.getItem("admin_unlocked") === "1") {
+    document.getElementById("lock-screen").style.display = "none";
+    document.getElementById("admin-content").style.display = "block";
+    load();
+  } else {
+    const input = document.getElementById("lock-input");
+    function tryUnlock() {
+      sha256(input.value).then(h => {
+        if (h === ADMIN_PASSWORD_HASH) {
+          sessionStorage.setItem("admin_unlocked", "1");
+          document.getElementById("lock-screen").style.display = "none";
+          document.getElementById("admin-content").style.display = "block";
+          load();
+        } else {
+          document.getElementById("lock-error").innerText = "Неверный пароль";
+          input.value = "";
+        }
+      });
+    }
+    document.getElementById("lock-btn").onclick = tryUnlock;
+    input.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+    input.focus();
+  }
+</script>
+
 </body>
 </html>

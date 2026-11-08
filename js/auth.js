@@ -66,12 +66,13 @@ function enterApp(login, user) {
   loadProgress(login);
   document.getElementById("user-name-val").innerText = currentUser.name;
 
-  if (currentUser.currentRoute) {
-    startRoute(currentUser.currentRoute);
-  } else {
-    showRouteSelect();
-  }
+  // Выбор маршрута всегда первый экран после входа,
+  // даже если маршрут уже был выбран ранее
+  document.getElementById("main-container").style.display = "none";
+  document.getElementById("login-screen").classList.add("hidden");
+  showRouteSelect();
 }
+
 
 function logout() {
   currentUser = null;

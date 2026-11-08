@@ -1,3 +1,12 @@
+function calcMinZoom() {
+  const el = document.getElementById("map");
+  const h = el && el.clientHeight ? el.clientHeight : 800;
+  // Высота мира в проекции Меркатора: 256 * 2^zoom пикселей.
+  // Берём минимальный зум, при котором мир всегда закрывает экран по высоте.
+  // По ширине мир зацикливается бесшовно, поэтому важна только высота.
+  return Math.max(2, Math.ceil(Math.log2(h / 256)));
+}
+
 function initMap(route) {
   // Если карта уже была (смена маршрута) — сносим и создаём заново
   if (myMap) {
@@ -5,17 +14,23 @@ function initMap(route) {
     myMap = null;
   }
 
+  const minZ = calcMinZoom();
+
   myMap = new ymaps.Map("map", {
     center: route.center,
-    zoom: route.zoom,
+    zoom: Math.max(route.zoom, minZ),
     controls: ["zoomControl"]
   }, {
-    // Запираем карту в пределах мира (широта +85…-85 — границы самой проекции).
-    // Дальше этой рамки пользователь не отдалится и не уедет —
-    // серые зоны "нет данных" появиться не могут в принципе,
-    // а по горизонтали мир повторяется бесшовно, как в приложении Яндекс Карт.
-    restrictMapArea: [[-85.05, -180], [85.05, 180]]
+    minZoom: minZ,
+    maxZoom: 19
   });
+
+  // При повороте телефона или изменении окна пересчитываем ограничение
+  window.onresize = () => {
+    if (!myMap) return;
+    myMap.options.set("minZoom", calcMinZoom());
+    myMap.container.fitToViewport();
+  };
 
   updateMapMarkers();
 
@@ -23,6 +38,7 @@ function initMap(route) {
   setTimeout(() => {
     if (!myMap) return;
     myMap.container.fitToViewport();
+    myMap.options.set("minZoom", calcMinZoom());
     if (geoObjects.length) {
       myMap.setBounds(myMap.geoObjects.getBounds(), {
         checkZoomRange: true,

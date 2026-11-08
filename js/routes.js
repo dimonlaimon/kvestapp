@@ -42,7 +42,7 @@ function chooseRoute(id) {
 function startRoute(id) {
   const route = routesData.find(r => r.id === id);
 
-  document.getElementById("header-title").innerText = "🌳 ЭкоСлед · " + route.title;
+  document.getElementById("header-title").innerText = "🏛️ Городские истории · " + route.title;
   document.getElementById("main-container").style.display = "flex";
 
   document.getElementById("score-val").innerText = currentUser.score;

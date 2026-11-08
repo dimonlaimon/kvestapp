@@ -3,47 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ЭкоСлед Истории — Политех</title>
+<title>ЭкоСлед Истории</title>
 <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-
-<!-- 1) Стили -->
 <link rel="stylesheet" href="css/style.css">
-
-<!-- 2) Данные (порядок внутри не важен, но должны идти раньше логики) -->
 <script src="data/users.js"></script>
-<script src="data/quests.js"></script>
+<script src="data/routes.js"></script>
 <script src="data/answers.js"></script>
 <script src="data/prizes.js"></script>
-
-<!-- 3) Логика (строго после данных) -->
 <script src="js/state.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/routes.js"></script>
 <script src="js/map.js"></script>
-<script src="js/route.js"></script>
+<script src="js/quest.js"></script>
 <script src="js/shop.js"></script>
 <script src="js/main.js"></script>
 </head>
 <body>
 <div id="app">
-  <div id="header">🌳 ЭкоСлед Истории: Политех</div>
+  <div id="header"><span id="header-title">🌳 ЭкоСлед Истории</span></div>
 
-  <div id="login-screen">
+  <!-- ЭКРАН ВХОДА / РЕГИСТРАЦИИ -->
+  <div id="login-screen" class="overlay">
     <div class="login-box">
+      <div class="login-logo">🌳</div>
       <div class="login-title">ЭкоСлед Истории</div>
-      <div class="login-sub">Прогулка-квест по кампусу Политеха</div>
-      <input type="text" id="username" class="input-field" placeholder="Логин" autocomplete="off">
-      <input type="password" id="password" class="input-field" placeholder="Пароль">
-      <button class="btn" onclick="tryLogin()">Войти</button>
-      <div class="login-hint">
+      <div class="login-sub">Прогулки-квесты по паркам Санкт-Петербурга</div>
+
+      <div id="auth-tabs">
+        <button id="lt-login" class="mini-tab active" onclick="showAuthMode('login')">Вход</button>
+        <button id="lt-reg" class="mini-tab" onclick="showAuthMode('reg')">Регистрация</button>
       </div>
+
+      <input id="reg-name" class="input-field reg-field hidden" placeholder="Как вас зовут?">
+      <input id="username" class="input-field" placeholder="Логин" autocomplete="off">
+      <input id="password" class="input-field" type="password" placeholder="Пароль">
+      <input id="reg-password2" class="input-field reg-field hidden" type="password" placeholder="Повторите пароль">
+      <button class="btn" id="auth-btn" onclick="tryLogin()">Войти</button>
     </div>
   </div>
 
-  <div id="main-container">
-    <div id="user-info">Игрок: <span id="user-name-val">…</span></div>
-    <div id="score-board">Баллы: <span id="score-val">0</span></div>
+  <!-- ЭКРАН ВЫБОРА МАРШРУТА -->
+  <div id="route-select" class="overlay hidden">
+    <div class="route-picker">
+      <div class="login-title">Выберите маршрут</div>
+      <div class="login-sub">Парк, по которому пойдёте на прогулку-квест</div>
+      <div id="route-cards"></div>
+    </div>
+  </div>
 
+  <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+  <div id="main-container">
+
+    <!-- ВКЛАДКА 1: КАРТА -->
     <div id="screen-map" class="screen active">
+      <div id="user-info">👤 <span id="user-name-val">…</span></div>
+      <div id="score-board">⭐ <span id="score-val">0</span></div>
       <div id="map"></div>
       <div id="quest-card">
         <div class="badge">📍 Локация разблокирована</div>
@@ -55,16 +69,22 @@
       </div>
     </div>
 
+    <!-- ВКЛАДКА 2: СКАНЕР И МАРШРУТ -->
     <div id="screen-quests" class="screen padd-content">
+      <div id="route-banner">
+        <span>Маршрут: <b id="rb-name"></b></span>
+        <button class="link-btn" onclick="showRouteSelect()">Сменить</button>
+      </div>
       <h3>📷 Сканер QR-табличек</h3>
       <div class="scanner-view">
         <div class="scanner-line"></div>
         <span>Демо-видоискатель камеры</span>
       </div>
-      <h3>Маршрут «Легенды Политеха»</h3>
+      <h3>Точки маршрута</h3>
       <div id="route-list"></div>
     </div>
 
+    <!-- ВКЛАДКА 3: МАГАЗИН -->
     <div id="screen-shop" class="screen padd-content">
       <h3>🎁 Магазин поощрений</h3>
       <div id="shop-list"></div>

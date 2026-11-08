@@ -8,7 +8,6 @@ function calcMinZoom() {
 }
 
 function initMap(route) {
-  // Если карта уже была (смена маршрута) — сносим и создаём заново
   if (myMap) {
     try { myMap.destroy(); } catch (e) {}
     myMap = null;
@@ -25,7 +24,6 @@ function initMap(route) {
     maxZoom: 19
   });
 
-  // При повороте телефона или изменении окна пересчитываем ограничение
   window.onresize = () => {
     if (!myMap) return;
     myMap.options.set("minZoom", calcMinZoom());
@@ -34,7 +32,6 @@ function initMap(route) {
 
   updateMapMarkers();
 
-  // Даём карте установить размер и подгоняем масштаб под все точки маршрута
   setTimeout(() => {
     if (!myMap) return;
     myMap.container.fitToViewport();

@@ -1,38 +1,34 @@
-function initMap() {
+function initMap(route) {
   myMap = new ymaps.Map("map", {
-    center: [60.0067, 30.3740],          // [широта, долгота] — не перепутано!
-    zoom: 16,
-    controls: ['zoomControl']
+    center: route.center,
+    zoom: route.zoom,
+    controls: ["zoomControl"]
   });
   updateMapMarkers();
 }
 
 function updateMapMarkers() {
-  if (!myMap) return;
+  if (!myMap || !currentUser.currentRoute) return;
   geoObjects.forEach(obj => myMap.geoObjects.remove(obj));
   geoObjects = [];
-  const currentActiveId = getNextActiveQuestId();
 
-  questPoints.forEach(point => {
-    let color = '#cccccc';
+  const route = routesData.find(r => r.id === currentUser.currentRoute);
+  const done = getRouteProgress(route.id);
+  const active = getActivePoint();
+
+  route.points.forEach(point => {
+    let color = "#cccccc";
     let hint = "Идите по цепочке маршрута";
-    if (currentUser.completed.includes(point.id)) {
-      color = '#00cc66'; hint = "Пройдено! ✅";
-    } else if (point.id === currentActiveId) {
-      color = '#0077ff'; hint = "Сканируйте QR на локации!";
+    if (done.includes(point.id)) {
+      color = "#00cc66"; hint = "Пройдено! ✅";
+    } else if (active && point.id === active.id) {
+      color = "#0077ff"; hint = "Сканируйте QR на локации!";
     }
     const placemark = new ymaps.Placemark(point.coords, {
       hintContent: point.title,
-      balloonContent: '<b>' + point.title + '</b><br>' + hint
-    }, { preset: 'islands#circleDotIcon', iconColor: color });
+      balloonContent: "<b>" + point.title + "</b><br>" + hint
+    }, { preset: "islands#circleDotIcon", iconColor: color });
     geoObjects.push(placemark);
     myMap.geoObjects.add(placemark);
   });
-}
-
-function getNextActiveQuestId() {
-  for (let i = 0; i < questPoints.length; i++) {
-    if (!currentUser.completed.includes(questPoints[i].id)) return questPoints[i].id;
-  }
-  return null;
 }

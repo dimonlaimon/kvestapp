@@ -1,10 +1,27 @@
 function initMap(route) {
+  // Если карта уже была (смена маршрута) — сносим и создаём заново,
+  // иначе она остаётся привязана к старому центру и размеру
+  if (myMap) {
+    try { myMap.destroy(); } catch (e) {}
+    myMap = null;
+  }
+
   myMap = new ymaps.Map("map", {
     center: route.center,
     zoom: route.zoom,
     controls: ["zoomControl"]
   });
+
+  // Не даём отдалиться дальше 12 — на мелких зумах у тайлов нет данных
+  // и появляются серые области
+  myMap.events.add("boundschange", () => {
+    if (myMap.getZoom() < 12) myMap.setZoom(12, { duration: 200 });
+  });
+
   updateMapMarkers();
+
+  // Пересчёт размера после того, как контейнер точно получил высоту
+  setTimeout(() => { if (myMap) myMap.container.fitToViewport(); }, 300);
 }
 
 function updateMapMarkers() {

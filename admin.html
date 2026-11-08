@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админка — Городские истории</title>
+<style>
+  body { font-family: -apple-system, "Roboto", sans-serif; background: #eef2f6; margin: 0; padding: 20px; }
+  h2 { color: #1a2b4a; }
+  .card { background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(20,40,90,.08); }
+  .name { font-weight: 700; color: #1a2b4a; }
+  .meta { font-size: 13px; color: #7a8494; margin-top: 4px; line-height: 1.5; }
+  button { border: none; border-radius: 9px; padding: 8px 14px; font-size: 13px;
+    font-weight: 600; cursor: pointer; margin-right: 8px; margin-top: 8px; }
+  .reset { background: #e3f2fd; color: #1565c0; }
+  .del   { background: #ffebee; color: #c62828; }
+</style>
+</head>
+<body>
+<h2>Пользователи</h2>
+<div id="list"></div>
+<script>
+  function load() {
+    const box = document.getElementById("list");
+    box.innerHTML = "";
+    let users = {};
+    try { users = JSON.parse(localStorage.getItem("ecosled_accounts")) || {}; } catch (e) {}
+
+    if (!Object.keys(users).length) {
+      box.innerHTML = "<div class='card'>Зарегистрированных пользователей нет.</div>";
+    }
+
+    Object.keys(users).forEach(login => {
+      const u = users[login];
+      let prog = {};
+      try { prog = JSON.parse(localStorage.getItem("ecosled_progress_" + login)) || {}; } catch (e) {}
+
+      const routes = prog.completedByRoute || {};
+      const routesTxt = Object.keys(routes).length
+        ? Object.keys(routes).map(r => r + ": " + routes[r].length + " точек").join(", ")
+        : "маршруты не начаты";
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML =
+        "<div class='name'>" + (u.name || login) + " <span style='color:#8a94a6'>(" + login + ")</span></div>" +
+        "<div class='meta'>Баллы: " + (prog.score != null ? prog.score : u.score) +
+        " · Текущий маршрут: " + (prog.currentRoute || "не выбран") + "<br>" + routesTxt + "</div>";
+
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "reset";
+      resetBtn.innerText = "Сбросить прогресс";
+      resetBtn.onclick = () => {
+        localStorage.removeItem("ecosled_progress_" + login);
+        load();
+      };
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "del";
+      delBtn.innerText = "Удалить аккаунт";
+      delBtn.onclick = () => {
+        const saved = JSON.parse(localStorage.getItem("ecosled_accounts") || "{}");
+        delete saved[login];
+        localStorage.setItem("ecosled_accounts", JSON.stringify(saved));
+        localStorage.removeItem("ecosled_progress_" + login);
+        load();
+      };
+
+      card.appendChild(resetBtn);
+      card.appendChild(delBtn);
+      box.appendChild(card);
+    });
+  }
+  load();
+</script>
+</body>
+</html>

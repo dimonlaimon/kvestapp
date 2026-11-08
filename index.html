@@ -2,14 +2,22 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ЭкоСлед Истории</title>
+
+<!-- Яндекс.Карты -->
 <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+
+<!-- 1) Стили -->
 <link rel="stylesheet" href="css/style.css">
+
+<!-- 2) Данные (должны идти раньше логики) -->
 <script src="data/users.js"></script>
 <script src="data/routes.js"></script>
 <script src="data/answers.js"></script>
 <script src="data/prizes.js"></script>
+
+<!-- 3) Логика (строго после данных) -->
 <script src="js/state.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/routes.js"></script>
@@ -26,8 +34,8 @@
   <div id="login-screen" class="overlay">
     <div class="login-box">
       <div class="login-logo">🌳</div>
-      <div class="login-title">ЭкоСлед Истории</div>
-      <div class="login-sub">Прогулки-квесты по паркам Санкт-Петербурга</div>
+      <div class="login-title" id="auth-title">ЭкоСлед Истории</div>
+      <div class="login-sub" id="auth-sub">Введите логин и пароль, чтобы продолжить прогулку</div>
 
       <div id="auth-tabs">
         <button id="lt-login" class="mini-tab active" onclick="showAuthMode('login')">Вход</button>
@@ -48,6 +56,9 @@
       <div class="login-title">Выберите маршрут</div>
       <div class="login-sub">Парк, по которому пойдёте на прогулку-квест</div>
       <div id="route-cards"></div>
+    </div>
+    <div class="overlay-actions">
+      <button class="btn-outline" onclick="logout()">Выйти из аккаунта</button>
     </div>
   </div>
 
@@ -90,6 +101,7 @@
       <div id="shop-list"></div>
     </div>
 
+    <!-- Таб-бар -->
     <div id="tab-bar">
       <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
         <div class="tab-icon">🗺️</div><div>Карта</div>

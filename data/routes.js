@@ -1,10 +1,12 @@
-// Маршруты. Чтобы добавить новый парк — просто добавьте объект в этот массив.
 const routesData = [
   {
     id: "polytech",
     title: "Легенды Политеха",
     area: "Кампус Политехнического университета",
+    desc: "История главного инженерного вуза страны: башни, корпуса и легенды студентов",
     icon: "🏛️",
+    gradient: "linear-gradient(135deg, #0077ff 0%, #00c6ff 100%)",
+    distance: "~2 км",
     center: [60.0067, 30.3740], zoom: 16,
     points: [
       { id: 1, title: "Главное здание Политеха", coords: [60.007111, 30.372545], qrCode: "QR_POLY_MAIN",
@@ -22,7 +24,10 @@ const routesData = [
     id: "letniy",
     title: "Летний сад",
     area: "Центральный район, набережные Невы и Мойки",
+    desc: "Первый парк Петербурга: мрамор, басни Крылова и дух Петровской эпохи",
     icon: "🌺",
+    gradient: "linear-gradient(135deg, #f5576c 0%, #f093fb 100%)",
+    distance: "~1,5 км",
     center: [59.9453, 30.3452], zoom: 16,
     points: [
       { id: 4, title: "Лебяжья канавка", coords: [59.9415, 30.3428], qrCode: "QR_LS_SWAN",
@@ -40,7 +45,10 @@ const routesData = [
     id: "yelagin",
     title: "Елагин остров",
     area: "ЦПКиО им. С. М. Кирова",
+    desc: "Императорская резиденция и самый уютный остров Петербурга: дворец Росси, пруды, лебеди",
     icon: "🦢",
+    gradient: "linear-gradient(135deg, #00a86b 0%, #38ef7d 100%)",
+    distance: "~4 км",
     center: [59.9800, 30.2570], zoom: 15,
     points: [
       { id: 7, title: "Елагин дворец", coords: [59.9797, 30.2568], qrCode: "QR_EL_PALACE",
@@ -58,7 +66,10 @@ const routesData = [
     id: "sosnovka",
     title: "Сосновка",
     area: "Выборгский район, лесопарк",
+    desc: "Тайный фронтовой аэродром в лесу: мемориалы, собаки-герои и настоящий военный история",
     icon: "✈️",
+    gradient: "linear-gradient(135deg, #6a5cff 0%, #b06ab3 100%)",
+    distance: "~3 км",
     center: [60.0262, 30.3257], zoom: 15,
     points: [
       { id: 10, title: "Мемориал защитникам ленинградского неба", coords: [60.0287, 30.3266], qrCode: "QR_SOS_SKY",
